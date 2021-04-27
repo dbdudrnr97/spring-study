@@ -11,6 +11,8 @@ public interface BoardService {
 
 	int getTotalContents();
 
-	int boardEnroll(Board board);
+	int insertBoard(Board board);
+
+	Board selectBoardDetail(int no);
 
 }

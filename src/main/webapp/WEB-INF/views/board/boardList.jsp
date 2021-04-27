@@ -14,6 +14,15 @@ input#btn-add{float:right; margin: 0 0 15px;}
 function goBoardForm(){
 	location.href = "${pageContext.request.contextPath}/board/boardForm.do";
 }
+$(() => {
+	$("tr[data-no]").click(e => {
+		var $tr = $(e.target).parent();
+		var no = $tr.data("no");
+		console.log(no);
+		
+		location.href = `${pageContext.request.contextPath}/board/boardDetail.do?no=\${no}`
+	});
+});
 </script>
 <section id="board-container" class="container">
 	<input type="button" value="글쓰기" id="btn-add" class="btn btn-outline-success" onclick="goBoardForm();"/>
@@ -27,17 +36,17 @@ function goBoardForm(){
 			<th>조회수</th>
 		</tr>
 		<c:forEach items="${list}" var="board">
-		<tr>
-			<th>${board.no}</th>
-			<th>${board.title}</th>
-			<th>${board.memberId }</th>
-			<th><fmt:formatDate value="${board.regDate}" pattern="yyyy-MM-dd"/></th>
-			<th>
+		<tr data-no="${board.no}">
+			<td>${board.no}</td>
+			<td>${board.title}</td>
+			<td>${board.memberId }</td>
+			<td><fmt:formatDate value="${board.regDate}" pattern="yyyy-MM-dd"/></td>
+			<td>
 				<c:if test="${board.attachCount gt 0}">
 	            <img src="${pageContext.request.contextPath}/resources/images/file.png" alt="file" style="height: 20px"/>
 	            </c:if>
-			</th>
-			<th>${board.readCount}</th>
+			</td>
+			<td>${board.readCount}</td>
 		</tr>
 		</c:forEach>
 	</table>

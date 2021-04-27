@@ -55,7 +55,7 @@ public class DemoController {
 		model.addAttribute("dev", dev); // model객체를 통해 jsp에 전달
 		
 		
-		return "demo/devResult";
+		return "/demo/devResult";
 	}
 	
 	@RequestMapping(value ="/dev2.do", method = RequestMethod.POST)

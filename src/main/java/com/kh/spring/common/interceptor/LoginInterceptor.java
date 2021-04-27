@@ -27,7 +27,7 @@ public class LoginInterceptor extends HandlerInterceptorAdapter {
 			manager.saveOutputFlashMap(flashMap, request, response);
 			
 			
-			response.sendRedirect(request.getContextPath());
+			response.sendRedirect(request.getContextPath()+"/member/login.do");
 			return false;
 		}
 		

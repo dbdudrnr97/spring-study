@@ -18,7 +18,7 @@
 		from board
 	</select>
 	
-	<insert id="boardEnroll">
+	<insert id="insertBoard">
 		insert into board
 		values (
 			seq_board_no.nextval,
@@ -28,5 +28,32 @@
 			default,
 			default
 		)
+		<!-- 인서트와 동시에 쿼리문을 날릴수 있음 , resultType , keyProperty="java.Board.no에 담아줌", order="위의 쿼리문이 실행된 AFTER에 실행해라" -->
+	<selectKey resultType="_int" keyProperty="no" order="AFTER"> 
+		select seq_board_no.currval
+		from dual
+	</selectKey>
 	</insert>
+	
+	<insert id="insertAttachment">
+		insert into 
+			attachment(no, board_no, original_filename, renamed_filename)
+		values (
+			seq_attachment_no.nextval,
+			#{boardNo},
+			#{originalFileName},
+			#{renamedFileName}
+		)
+	</insert>
+	
+	
+	<select id="selectBoardDetail" resultType="board">
+		select * from board
+		where no = #{no}
+	</select>
+	
+	<select id="selectAttachmentList" resultType="attachment">
+		select * from attachment
+		where board_no = #{no}
+	</select>
 </mapper>

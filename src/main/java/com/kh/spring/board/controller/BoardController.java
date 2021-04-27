@@ -1,25 +1,29 @@
 package com.kh.spring.board.controller;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.kh.spring.board.model.service.BoardService;
+import com.kh.spring.board.model.vo.Attachment;
 import com.kh.spring.board.model.vo.Board;
 import com.kh.spring.common.HelloSpringUtils;
-import com.kh.spring.member.model.vo.Member;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -56,26 +60,74 @@ public class BoardController {
 	}
 	
 	@GetMapping("/boardForm.do")
-	public void boardForm(HttpServletRequest request, Model model) {
-		//로그인한 회원 확인
-		Member member = (Member) request.getSession().getAttribute("loginMember");
-		log.debug("member = {}" , member);
-		
-		model.addAttribute("loginMember", member);
+	public void boardForm() {
 	}
 	
+	/**
+		1. form[enctype=multipart/form-data]
+		2. @RequestParam MultipartFile upFile
+		3. 서버컴퓨터에 파일 저장 
+				: saveDirectory (/resources/upload/board/20210427_12345_678.jpg)
+				: 파일명 재지정
+		4. DB[attachment]에 저장된 파일정보 등록
+	 */
 	@PostMapping("boardEnroll.do")
-	public String boardEnroll(Board board, RedirectAttributes redirectAttr) {
+	public String boardEnroll(@ModelAttribute Board board,
+								@RequestParam(value="upFile", required = false) MultipartFile[] upFiles,
+								HttpServletRequest request,
+								RedirectAttributes redirectAttr) {
+		
 		try {
-			int result = boardService.boardEnroll(board);
+			//0. 파일 저장
+			//저장경로
+			String saveDirectory = 
+					request.getServletContext().getRealPath("/resources/upload/board");
+			//위의 파일이 없다면 File객체를 통해서 directory생성 가능
+			File dir = new File(saveDirectory);
+			if(!dir.exists()) // dir이 존재하지 않는가?
+				dir.mkdirs(); // 복수개 폴더 생성가능
+			
+			//복수개의 Attachment객체를 담을 list 생성
+			List<Attachment> attachList = new ArrayList<Attachment>();
+
+			
+				for(MultipartFile upFile : upFiles) {
+					if(upFile.isEmpty()) continue;
+					log.debug("upFile = {}", upFile);
+					log.debug("upFile = {}", upFile.getOriginalFilename());
+					log.debug("upFile = {}", upFile.getSize());	
+					//저장할 파일명 생성
+					File renamedFile = HelloSpringUtils.getRenamedFile(saveDirectory, upFile.getOriginalFilename());
+					//파일 저장
+					upFile.transferTo(renamedFile);
+					Attachment attach = new Attachment();
+					attach.setOriginalFileName(upFile.getOriginalFilename());
+					attach.setRenamedFileName(renamedFile.getName());
+					attachList.add(attach);				
+				}
+			
+			board.setAttachList(attachList);
+			int result = boardService.insertBoard(board);
+			
+			
 			redirectAttr.addFlashAttribute("msg", "게시물 저장이 완료되었습니다.");
 			
+		} catch (IOException | IllegalStateException e) {
+			log.error("첨부파일 저장오류", e);
+			throw new BoardException();
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.error("게시물 등록 오류", e);
 			throw e;
 		}
 		return "redirect:/board/boardList.do";
 	}
 	
+	@GetMapping("/boardDetail.do")
+	public String boardDetail(@RequestParam int no, Model model) {
+		
+		Board board = boardService.selectBoardDetail(no);
+		model.addAttribute("board", board);
+		return "/board/boardDetail";
+	}
 	
 }

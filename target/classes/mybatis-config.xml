@@ -15,5 +15,6 @@
 	
 	<typeHandlers>
 		<typeHandler handler="com.kh.spring.common.typehandler.StringArrayTypeHandler"/>
+		<typeHandler handler="com.kh.spring.common.typehandler.BooleanTypeHandler"/>
 	</typeHandlers>
 </configuration>

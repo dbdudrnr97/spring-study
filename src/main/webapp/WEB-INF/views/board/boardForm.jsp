@@ -23,10 +23,28 @@ function boardValidate(){
 	}
 	return true;
 }
+$(() => {
+	$("[name=upFile]").change(e => {
+		var $file = $(e.target);
+		var f = $file.prop("files")[0]; <%-- prop는 배열을 리턴한다. --%>
+		
+		var $label = $file.next(".custom-file-label");
+		
+		if(f === undefined)
+			$label.text("파일을 선택하세요.");
+		else
+			$label.text(f.name);
+	});
+});
 
 </script>
 <div id="board-container">
-	<form name="boardFrm" action="${pageContext.request.contextPath}/board/boardEnroll.do" method="post" onsubmit="return boardValidate();">
+	<form name="boardFrm" 
+			action="${pageContext.request.contextPath}/board/boardEnroll.do" 
+			method="post" 
+			onsubmit="return boardValidate();"
+			enctype="multipart/form-data"
+		>
 		<input type="text" class="form-control" placeholder="제목" name="title" id="title" required>
 		<input type="text" class="form-control" name="memberId" value="${loginMember.id}" readonly required>
 		<!-- input:file소스 : https://getbootstrap.com/docs/4.1/components/input-group/#custom-file-input -->
@@ -35,8 +53,16 @@ function boardValidate(){
 		    <span class="input-group-text">첨부파일1</span>
 		  </div>
 		  <div class="custom-file">
-		    <input type="file" class="custom-file-input" name="upFile" id="upFile1" >
+		    <input type="file" class="custom-file-input" name="upFile" id="upFile1">
 		    <label class="custom-file-label" for="upFile1">파일을 선택하세요</label>
+		  </div>
+		<div class="input-group mb-3" style="padding:0px;">
+		  <div class="input-group-prepend" style="padding:0px;">
+		    <span class="input-group-text">첨부파일2</span>
+		  </div>
+		  <div class="custom-file">
+		    <input type="file" class="custom-file-input" name="upFile" id="upFile2">
+		    <label class="custom-file-label" for="upFile2">파일을 선택하세요</label>
 		  </div>
 		</div>
 		

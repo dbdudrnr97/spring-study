@@ -29,6 +29,13 @@
 		<beans:property name="suffix" value=".jsp" />
 	</beans:bean>
 	
+	    <!-- #12.1 파일업로드를 처리할 Resolver클래스 빈등록(빈이름 주의) -->
+	<beans:bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">   
+		<beans:property name="maxUploadSize" value="52428800" /> <!-- multipart/form-data 요청당 최대 파일 크기는 50MB(50 * 1024 * 1024)이다. default: -1(제한없음)-->
+		<beans:property name="maxUploadSizePerFile" value="10485760" /> <!-- 파일하나당 최대용량은 10MB(10 * 1024 * 1024)이다. 기본값: -1(제한없음) -->
+		<beans:property name="maxInMemorySize" value="10240" /> <!-- 메모리 사용최대용량. 기본값 10240. 이값을 넘어가면, 임시파일로 저장함. -->
+	</beans:bean>
+	
 	
 	<!-- base package이하의 어노테이션(@) : @Component, @Autowired 등 빈을 등록/연결 처리 -->
 	<context:component-scan base-package="com.kh.spring" />
@@ -42,7 +49,9 @@
 		<interceptor>
 		<!-- /member아래 모든 요청을 맵핑하되 아래 exclude-mapping에 등록된 경로는 제외해라 -->
 			<mapping path="/member/**/*.do"/>
-			<mapping path="/board/boardForm.do" />
+			<mapping path="/board/**/*.do" />
+			<exclude-mapping path="/board/boardList.do" />
+			<exclude-mapping path="/board/boardDetail.do" />
 			<exclude-mapping path="/member/login.do" />
 			<exclude-mapping path="/member/memberEnroll.do" />
 			<beans:bean id="loginInterceptor" class="com.kh.spring.common.interceptor.LoginInterceptor"/>
@@ -63,5 +72,7 @@
 	</aop:config> -->
 	
 	<!-- #11.1 어노테이션 AOP관련 작성 -->
-	<aop:aspectj-autoproxy /> <!-- AOP관련 Annotation처리 & application-context의 aop관련설정을 servlet-context에도 적용  -->
+	 <!-- AOP관련 Annotation처리 & application-context의 aop관련설정을 servlet-context에도 적용
+	 		@Transactional 또는 선언적방식 모두 필수  -->
+	<aop:aspectj-autoproxy />
 </beans:beans>
